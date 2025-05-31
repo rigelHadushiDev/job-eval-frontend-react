@@ -1,118 +1,193 @@
-import { useParams, useLoaderData, useNavigate, Link } from "react-router-dom";
-import Spinner from "../components/Spinner";
-import { FaArrowLeft, FaMapMarker } from "react-icons/fa";
-import { toast } from "react-toastify";
-
-function JobPage({ deleteJob }) {
-  const { id } = useParams();
-  const job = useLoaderData();
-  const navigate = useNavigate();
-
-  const onDeleteClick = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this job?");
-    if (!confirm) return;
-    await deleteJob(id);
-
-    toast.success("Job Deleted Successfully");
-    navigate("/jobs");
-  };
-
-  return (
-    <>
-      <section>
-        <div className="container m-auto py-6 px-6">
-          <Link
-            to="/jobs"
-            className="text-indigo-500 hover:text-indigo-600 flex items-center"
-          >
-            <FaArrowLeft className="mr-2" /> Back to Job Listings
-          </Link>
-        </div>
-      </section>
-
-      <section className="bg-indigo-50">
-        <div className="container m-auto py-10 px-6">
-          <div className="grid grid-cols-1 md:grid-cols-70/30 w-full gap-6">
-            <main>
-              <div className="bg-white p-6 rounded-lg shadow-md text-center md:text-left">
-                <div className="text-gray-500 mb-4">{job.type}</div>
-                <h1 className="text-3xl font-bold mb-4">{job.title}</h1>
-                <div className="text-gray-500 mb-4 flex align-middle justify-center md:justify-start">
-                  <FaMapMarker className="text-orange-700 mr-1" />
-                  <p className="text-orange-700">{job.location}</p>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h3 className="text-indigo-800 text-lg font-bold mb-6">
-                  Job Description
-                </h3>
-
-                <p className="mb-4">{job.description}</p>
-
-                <h3 className="text-indigo-800 text-lg font-bold mb-2">
-                  Salary
-                </h3>
-
-                <p className="mb-4">{job.salary}</p>
-              </div>
-            </main>
-            {/* 
-          <!-- Sidebar --> */}
-            <aside>
-              {/* <!-- Company Info --> */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-bold mb-6">Company Info</h3>
-
-                <h2 className="text-2xl">{job.company.name}</h2>
-
-                <p className="my-2">{job.company.description}</p>
-
-                <hr className="my-4" />
-
-                <h3 className="text-xl">Contact Email:</h3>
-
-                <p className="my-2 bg-indigo-100 p-2 font-bold">
-                  {job.company.contactEmail}
-                </p>
-
-                <h3 className="text-xl">Contact Phone:</h3>
-
-                <p className="my-2 bg-indigo-100 p-2 font-bold">
-                  {job.company.contactPhone}
-                </p>
-              </div>
-
-              {/* <!-- Manage --> */}
-              <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h3 className="text-xl font-bold mb-6">Manage Job</h3>
-                <Link
-                  to={`/edit-job/${job.id}`}
-                  className="bg-indigo-500 hover:bg-indigo-600 text-white text-center font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                >
-                  Edit Job
-                </Link>
-                <button
-                  onClick={() => onDeleteClick(job.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full w-full focus:outline-none focus:shadow-outline mt-4 block"
-                >
-                  Delete Job
-                </button>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </section>
-    </>
-  );
-}
+import React from "react";
+import { useLoaderData, useNavigate, useLocation } from "react-router-dom";
+import axios from "../api/axios";
+import {
+  WorkingTypeLabels,
+  EmploymentTypeLabels,
+} from "../constants/enumLabels";
+import useAuth from "../hooks/useAuth";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ERROR_MESSAGES from "../constants/ErrorMessages";
+import Footer from "../components/Footer";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const jobLoader = async ({ params }) => {
   const { id } = params;
-  const response = await fetch(`http://localhost:2000/jobs/${id}`, {
-    headers: { Accept: "application/json" },
-  });
-  return response.json();
+  try {
+    const response = await axios.get(`/jobPosting/getJobPosting`, {
+      params: { jobPostingId: id },
+    });
+    if (!response.data) throw new Error("Job not found");
+    return response.data;
+  } catch {
+    throw new Error("Job not found");
+  }
+};
+
+const JobPage = () => {
+  const job = useLoaderData();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuth();
+  const axiosPrivate = useAxiosPrivate();
+
+  if (!job)
+    return <div className="text-center py-20 text-red-400">Job not found</div>;
+
+  let skills = job.requiredSkills;
+  if (typeof skills === "string") {
+    skills = skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  if (!Array.isArray(skills)) skills = [];
+
+  return (
+    <>
+      <section className="min-h-screen py-16 px-2 md:px-4 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
+        <div className="w-full max-w-4xl min-h-[850px] bg-[#181c2f] rounded-3xl shadow-2xl p-6 md:p-12 border border-white/10 my-8 flex flex-col justify-center">
+          {/* Job Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div>
+              <h3 className="text-lg font-bold text-blue-400 mb-4">
+                Job Details
+              </h3>
+              <div className="text-sm text-white/90 space-y-2">
+                <div>
+                  <span className="font-semibold">Employment Type:</span>{" "}
+                  {EmploymentTypeLabels[job.employmentType] ||
+                    job.employmentType ||
+                    "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Experience Required:</span>{" "}
+                  {job.requiredExperienceYears
+                    ? `${job.requiredExperienceYears}+ years`
+                    : "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">English Level:</span>{" "}
+                  {job.requiredEnglishLevel || "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Working Type:</span>{" "}
+                  {WorkingTypeLabels[job.workingType] || job.workingType || "-"}
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-green-400 mb-4">
+                Location & Compensation
+              </h3>
+              <div className="text-sm text-white/90 space-y-2">
+                <div>
+                  <span className="font-semibold">City:</span> {job.city || "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Country:</span>{" "}
+                  {job.country || "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Salary Range:</span>{" "}
+                  {typeof job.minSalary === "number" &&
+                  typeof job.maxSalary === "number"
+                    ? `$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`
+                    : "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Application Deadline:</span>{" "}
+                  {job.closedAt
+                    ? new Date(job.closedAt).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "-"}
+                </div>
+                <div>
+                  <span className="font-semibold">Status:</span>{" "}
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs ml-1 ${
+                      job.closed
+                        ? "bg-red-700 text-red-100"
+                        : "bg-green-700 text-white"
+                    }`}
+                  >
+                    {job.closed ? "Closed" : "Open"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Job Description */}
+          <div className="mb-10">
+            <h3 className="text-lg font-bold text-purple-400 mb-4">
+              Job Description
+            </h3>
+            <div
+              className="text-white/90 whitespace-pre-line text-sm prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: job.jobDescription || "-" }}
+            />
+          </div>
+          {/* Required Skills */}
+          <div className="mb-10">
+            <h4 className="text-md font-bold text-orange-400 mb-2">
+              Required Skills
+            </h4>
+            <div className="flex flex-wrap gap-3">
+              {skills.length > 0 ? (
+                skills.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-[#23244a] text-blue-200 px-4 py-1 rounded-full text-sm border border-white/10"
+                  >
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-400">-</span>
+              )}
+            </div>
+          </div>
+          {/* Apply Button */}
+          <div className="mt-10">
+            <button
+              className="w-full py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-lg shadow-xl hover:from-blue-600 hover:to-purple-600 transition-all"
+              onClick={async () => {
+                if (!auth?.accessToken) {
+                  navigate("/sign-in", {
+                    state: { from: location },
+                    replace: true,
+                  });
+                } else if (auth?.role !== "USER") {
+                  toast.error("Unauthorized to apply");
+                } else {
+                  try {
+                    await axiosPrivate.post(`/jobApplication/apply`, null, {
+                      params: { jobPostingId: job.jobPostingId },
+                    });
+                    toast.success("Applied successfully");
+                  } catch (err) {
+                    const messageKey = err?.response?.data?.message;
+                    const toastMessage =
+                      ERROR_MESSAGES[messageKey] ||
+                      "Failed to apply for this job position. Please try again later.";
+                    toast.error(toastMessage);
+                  }
+                }
+              }}
+            >
+              Apply Now
+            </button>
+            <ToastContainer />
+          </div>
+        </div>
+      </section>
+      <Footer />
+    </>
+  );
 };
 
 export { JobPage as default, jobLoader };

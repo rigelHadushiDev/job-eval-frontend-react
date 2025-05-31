@@ -37,10 +37,12 @@ function Login() {
         }
       );
       JSON.stringify(response?.data);
-      const { accessToken, refreshToken, role, passwordChanged } =
+      const { userId, accessToken, refreshToken, role, passwordChanged } =
         response?.data ?? {};
 
-      setAuth({ user, pwd, accessToken, refreshToken, role });
+      console.log(userId);
+
+      setAuth({ userId, user, pwd, accessToken, refreshToken, role });
       setUser("");
       setPwd("");
 

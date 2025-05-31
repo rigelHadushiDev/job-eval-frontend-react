@@ -9,7 +9,9 @@ const ERROR_MESSAGES = {
 
     unexpectedErrorOccurred: "Unexpected error occurred. Try again later.",
     usernameExists: "Username is already taken.",
-    emailExists: "Email already taken."
+    emailExists: "Email already taken.",
+    alreadyAppliedForThisJob: "You have already applied for this job.",
+    applyApiFailed: "This operation failed. Please try again later.",
 };
 
 export default ERROR_MESSAGES;

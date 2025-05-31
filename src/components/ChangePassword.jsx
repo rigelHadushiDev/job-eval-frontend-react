@@ -8,6 +8,7 @@ import {
   faTimes,
   faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import ERROR_MESSAGES from "../constants/ErrorMessages";
 
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const CHANGE_PASSWORD_URL = "/user/changePassw";
@@ -49,7 +50,11 @@ const ChangePassword = () => {
       toast.success("Password changed successfully!");
       setTimeout(() => navigate("/"), 2000);
     } catch (err) {
-      toast.error("Failed to change password.");
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to change password. Please try again later.";
+      toast.error(toastMessage);
     } finally {
       setLoading(false);
     }

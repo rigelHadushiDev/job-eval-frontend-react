@@ -21,38 +21,6 @@ import ChangePassword from "./components/ChangePassword";
 import ForgetPassword from "./components/ForgotPassword";
 
 const App = () => {
-  // Add new Job
-  const addJob = async (job) => {
-    await fetch("http://localhost:2000/jobs", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(job),
-    });
-  };
-
-  // Delete Job
-
-  const deleteJob = async (id) => {
-    await fetch(`http://localhost:2000/jobs/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  };
-  // Edit Job
-  const editJob = async (job) => {
-    await fetch(`http://localhost:2000/jobs/${job.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(job),
-    });
-  };
-
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
@@ -64,16 +32,10 @@ const App = () => {
         <Route path="/" element={<UserLayout />}>
           <Route index element={<HomePage />} />
           <Route path="/jobs" element={<JobsPage />} />
+          <Route path="/job/:id" element={<JobPage />} loader={jobLoader} />
           <Route path="/change-password" element={<ChangePassword />} />
-          <Route
-            path="/add-job"
-            element={
-              <RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]}>
-                <AddJobPage addJobSubmit={addJob} />
-              </RequiredAuth>
-            }
-          />
-          <Route
+
+          {/* <Route
             element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}
           >
             <Route path="/users" element={<Users />} />
@@ -89,6 +51,15 @@ const App = () => {
             loader={jobLoader}
           />
           <Route path="*" element={<NotFoundPage />} />
+
+          <Route
+            path="/add-job"
+            element={
+              <RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]}>
+                <AddJobPage addJobSubmit={addJob} />
+              </RequiredAuth>
+            }
+          /> */}
         </Route>
       </>
     )

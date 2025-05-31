@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Full-Stack Development",
+    "description": "End-to-end web and mobile application development using cutting-edge technologies and frameworks.",
+    "icon": "🚀",
+    "gradient": "from-blue-500 to-cyan-500"
+  },
+  {
+    "title": "Cloud Architecture",
+    "description": "Scalable cloud solutions and infrastructure design for modern applications and enterprises.",
+    "icon": "☁️",
+    "gradient": "from-purple-500 to-pink-500"
+  },
+  {
+    "title": "AI & Machine Learning",
+    "description": "Intelligent solutions powered by artificial intelligence and advanced machine learning algorithms.",
+    "icon": "🤖",
+    "gradient": "from-green-500 to-teal-500"
+  },
+  {
+    "title": "DevOps & Automation",
+    "description": "Streamlined development workflows, CI/CD pipelines, and automated deployment solutions.",
+    "icon": "⚙️",
+    "gradient": "from-orange-500 to-red-500"
+  },
+  {
+    "title": "UI/UX Design",
+    "description": "Beautiful, intuitive user interfaces and exceptional user experiences that drive engagement.",
+    "icon": "🎨",
+    "gradient": "from-violet-500 to-purple-500"
+  },
+  {
+    "title": "Cybersecurity",
+    "description": "Robust security solutions to protect your applications and data from modern threats.",
+    "icon": "🔒",
+    "gradient": "from-slate-500 to-gray-600"
+  }
+]
