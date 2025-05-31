@@ -19,6 +19,7 @@ import RequiredAuth from "./components/RequireAuth";
 import Users from "./components/Users";
 import ChangePassword from "./components/ChangePassword";
 import ForgetPassword from "./components/ForgotPassword";
+import PersonalDetails from "./pages/PersonalDetailsPage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -34,6 +35,9 @@ const App = () => {
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/job/:id" element={<JobPage />} loader={jobLoader} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
+            <Route path="/personal-details" element={<PersonalDetails />} />
+          </Route>
 
           {/* <Route
             element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}
