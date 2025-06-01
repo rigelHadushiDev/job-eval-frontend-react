@@ -16,10 +16,10 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import Unauthorized from "./components/Unauthorized";
 import RequiredAuth from "./components/RequireAuth";
-import Users from "./components/Users";
 import ChangePassword from "./components/ChangePassword";
 import ForgetPassword from "./components/ForgotPassword";
 import PersonalDetails from "./pages/PersonalDetailsPage";
+import UserDataPage from "./pages/UserDataPage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -35,8 +35,15 @@ const App = () => {
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/job/:id" element={<JobPage />} loader={jobLoader} />
           <Route path="/change-password" element={<ChangePassword />} />
-          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
+          <Route
+            element={
+              <RequiredAuth allowedRoles={["USER", "RECRUITER", "ADMIN"]} />
+            }
+          >
             <Route path="/personal-details" element={<PersonalDetails />} />
+          </Route>
+          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
+            <Route path="/user-data" element={<UserDataPage />} />
           </Route>
 
           {/* <Route

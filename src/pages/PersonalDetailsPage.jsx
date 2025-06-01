@@ -1,24 +1,59 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaEdit, FaSave, FaTimes } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import PersonalDetailsForm from "../components/PersonalDetailsForm";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Spinner from "../components/Spinner";
+import ERROR_MESSAGES from "../constants/ErrorMessages";
 
-const PersonalDetails = () => {
-  const navigate = useNavigate();
+function formatDateToDDMMYYYY(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function ddmmyyyyToInput(dateStr) {
+  if (!dateStr) return "";
+  const [day, month, year] = dateStr.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
+const PersonalDetailsPage = () => {
+  const axiosPrivate = useAxiosPrivate();
+  const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [originalData, setOriginalData] = useState(null);
-  const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    bio: "Software engineer with 5+ years of experience in web development.",
-    linkedIn: "https://linkedin.com/in/johndoe",
-    github: "https://github.com/johndoe",
-    website: "https://johndoe.com",
-  });
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (e) => {
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosPrivate.get("/user/currentUser");
+        setFormData({
+          ...response.data,
+          birthdate: ddmmyyyyToInput(response.data.birthdate),
+        });
+      } catch (err) {
+        const messageKey = err?.response?.data?.message;
+        const toastMessage =
+          ERROR_MESSAGES[messageKey] ||
+          "We couldn't load your personal details. Please try again later.";
+        toast.error(toastMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [axiosPrivate]);
+
+  const handleEdit = () => setIsEditing(true);
+  const handleCancel = () => setIsEditing(false);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -26,131 +61,49 @@ const PersonalDetails = () => {
     }));
   };
 
-  const handleEdit = () => {
-    setOriginalData(formData);
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log("Saved personal details:", formData);
-  };
-
-  const handleCancel = () => {
-    setFormData(originalData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const dataToSend = {
+        ...formData,
+        birthdate: formatDateToDDMMYYYY(formData.birthdate),
+      };
+      const response = await axiosPrivate.patch("/user", dataToSend);
+      setFormData({
+        ...response.data,
+        birthdate: ddmmyyyyToInput(response.data.birthdate),
+      });
+      setIsEditing(false);
+      toast.success("Your changes have been saved successfully.");
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "We couldn't save your changes. Please try again.";
+      toast.error(toastMessage);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-5xl mx-auto relative mt-32">
-        {/* Header Section */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate("/")}
-              className="text-blue-600 hover:text-blue-800 text-lg font-semibold flex items-center"
-            >
-              <FaArrowLeft className="mr-2" />
-              <span className="text-xl">Personal Details</span>
-            </button>
-          </div>
-
-          {!isEditing ? (
-            <button
-              onClick={handleEdit}
-              className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 flex items-center gap-2"
-            >
-              <FaEdit /> Edit
-            </button>
-          ) : (
-            <div className="flex gap-2">
-              <button
-                onClick={handleSave}
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
-              >
-                <FaSave /> Save
-              </button>
-              <button
-                onClick={handleCancel}
-                className="bg-gray-100 text-black px-4 py-2 rounded-md hover:bg-gray-200 flex items-center gap-2"
-              >
-                <FaTimes /> Cancel
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-white rounded-xl shadow px-6 py-8 mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              {["firstName", "lastName", "email", "phone", "location"].map(
-                (field) => (
-                  <div key={field}>
-                    <label
-                      className="block text-sm font-semibold mb-1"
-                      htmlFor={field}
-                    >
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                    </label>
-                    <input
-                      id={field}
-                      name={field}
-                      type={field === "email" ? "email" : "text"}
-                      value={formData[field]}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-100"
-                    />
-                  </div>
-                )
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-sm font-semibold mb-1"
-                  htmlFor="bio"
-                >
-                  Bio
-                </label>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  rows={4}
-                  value={formData.bio}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-100"
-                />
-              </div>
-
-              {["linkedIn", "github", "website"].map((field) => (
-                <div key={field}>
-                  <label
-                    htmlFor={field}
-                    className="block text-sm font-semibold mb-1"
-                  >
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
-                  </label>
-                  <input
-                    id={field}
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-100"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+    <>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto p-6">
+          {loading ? (
+            <Spinner loading={loading} />
+          ) : formData ? (
+            <PersonalDetailsForm
+              formData={formData}
+              isEditing={isEditing}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onSave={handleSave}
+              onChange={handleChange}
+            />
+          ) : null}
         </div>
       </div>
-    </div>
+      <ToastContainer />
+    </>
   );
 };
 
-export default PersonalDetails;
+export default PersonalDetailsPage;
