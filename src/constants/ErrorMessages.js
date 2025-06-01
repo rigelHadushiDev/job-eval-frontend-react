@@ -25,7 +25,17 @@ const ERROR_MESSAGES = {
     unAuthorizedToViewEducation: "You are not authorized to view this education record.",
     skillNotFound: "The selected skill was not found.",
     unAuthorizedToViewSkills: "You are not authorized to view this user's skills.",
-    unAuthorizedToViewSkill: "You are not authorized to view this skill."
+    unAuthorizedToViewSkill: "You are not authorized to view this skill.",
+    unAuthorizedToViewApplicantEnglishLevel: "You are not authorized to view this English level entry.",
+    applicantEnglishLevelNotFound: "The requested English level entry was not found.",
+    notAuthorizedToViewTheseProjects: "You are not authorized to view these projects.",
+    projectNotFound: "The requested project was not found.",
+    notAuthorizedToViewThisProject: "You are not authorized to view this project.",
+    startDateCannotBeInFuture: "Start date cannot be in the future.",
+    endDateRequiredWhenExperienceIsFinished: "End date is required when experience is marked as finished.",
+    endDateRequiredWhenProjectIsFinished: "End date is required when project is marked as finished.",
+    endDateMustBeAfterStartDate: "End date must be after start date."
+
 
 };
 

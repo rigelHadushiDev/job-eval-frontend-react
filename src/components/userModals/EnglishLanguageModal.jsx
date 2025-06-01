@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
   const [languages, setLanguages] = useState([]);
-  const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({
-    language: "",
-    proficiency: "Beginner",
+    proficiencyLevel: "A1",
   });
 
-  const proficiencyLevels = ["Beginner", "Intermediate", "Advanced", "Native"];
+  const proficiencyLevels = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
   useEffect(() => {
-    setLanguages(currentLanguages);
+    setLanguages(currentLanguages || []);
   }, [currentLanguages]);
 
   const handleChange = (e) => {
@@ -21,27 +20,24 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
     });
   };
 
-  const handleAdd = () => {
-    setIsAdding(true);
-  };
-
   const handleSaveLanguage = () => {
-    if (formData.language.trim()) {
-      setLanguages([...languages, { ...formData, id: Date.now() }]);
-      setFormData({
-        language: "",
-        proficiency: "Beginner",
-      });
-      setIsAdding(false);
+    if (languages.length > 0) {
+      toast.error(
+        "You can only have one English proficiency level. Please delete the existing one first."
+      );
+      return;
     }
+
+    onSave([
+      {
+        proficiencyLevel: formData.proficiencyLevel,
+        id: Date.now(),
+      },
+    ]);
   };
 
   const handleDelete = (id) => {
     setLanguages(languages.filter((lang) => lang.id !== id));
-  };
-
-  const handleSave = () => {
-    onSave(languages);
   };
 
   return (
@@ -54,7 +50,7 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
         >
           &times;
         </button>
-        <h2 className="text-2xl font-bold mb-6">Manage Languages</h2>
+        <h2 className="text-2xl font-bold mb-6">English Proficiency</h2>
         <div className="space-y-4">
           {languages.map((lang) => (
             <div
@@ -62,8 +58,10 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
               className="flex justify-between items-center p-3 border rounded-lg"
             >
               <div>
-                <p className="font-medium">{lang.language}</p>
-                <p className="text-sm text-gray-600">{lang.proficiency}</p>
+                <p className="font-medium">English</p>
+                <p className="text-sm text-gray-600">
+                  Level {lang.proficiencyLevel}
+                </p>
               </div>
               <button
                 type="button"
@@ -75,35 +73,19 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
             </div>
           ))}
 
-          {isAdding && (
+          {languages.length === 0 && (
             <div className="border p-4 rounded-lg space-y-4">
               <div>
                 <label
-                  htmlFor="language"
+                  htmlFor="proficiencyLevel"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Language
-                </label>
-                <input
-                  id="language"
-                  name="language"
-                  value={formData.language}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="proficiency"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Proficiency Level
+                  English Proficiency Level
                 </label>
                 <select
-                  id="proficiency"
-                  name="proficiency"
-                  value={formData.proficiency}
+                  id="proficiencyLevel"
+                  name="proficiencyLevel"
+                  value={formData.proficiencyLevel}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -124,7 +106,7 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsAdding(false)}
+                  onClick={onClose}
                   className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   Cancel
@@ -132,33 +114,6 @@ const EnglishLanguageModal = ({ onClose, onSave, currentLanguages }) => {
               </div>
             </div>
           )}
-
-          {!isAdding && (
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="w-full px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-            >
-              Add Language
-            </button>
-          )}
-        </div>
-
-        <div className="flex justify-end space-x-2 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-          >
-            Save
-          </button>
         </div>
       </div>
     </div>
