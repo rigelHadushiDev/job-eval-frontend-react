@@ -1,52 +1,114 @@
-import React, { useState } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import React, { useState, useEffect, useCallback } from "react";
+import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import ProjectsModal from "../userModals/ProjectsModal";
+import ProjectCard from "../ProjectCard";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
+import useAuth from "../../hooks/useAuth";
+import ERROR_MESSAGES from "../../constants/ErrorMessages";
 
 const ProjectsSection = () => {
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      title: "E-commerce Platform",
-      description:
-        "Built a full-stack e-commerce platform using React, Node.js, and MongoDB",
-      technologies: "React, Node.js, MongoDB",
-      startDate: "2023-01",
-      endDate: "2023-06",
-      current: false,
-      url: "https://github.com/johndoe/ecommerce",
-    },
-  ]);
+  const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      const response = await axiosPrivate.get(
+        `/project/userProjects?userId=${auth.userId}`
+      );
+      setProjects(response.data);
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to load work experience details. Please try again later.";
+      toast.error(toastMessage);
+    }
+  }, [axiosPrivate, auth.userId]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleAdd = () => {
     setEditingItem(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (item) => {
-    setEditingItem(item);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    setProjects(projects.filter((project) => project.id !== id));
-  };
-
-  const handleSave = (data) => {
-    if (editingItem) {
-      setProjects(
-        projects.map((project) =>
-          project.id === editingItem.id
-            ? { ...data, id: editingItem.id }
-            : project
-        )
+  const handleEdit = async (project) => {
+    try {
+      const response = await axiosPrivate.get(
+        `/project/getProject?projectId=${project.projectId}`
       );
-    } else {
-      setProjects([...projects, { ...data, id: Date.now() }]);
+      setEditingItem(response.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to load project details. Please try again later.";
+      toast.error(toastMessage);
     }
-    setIsModalOpen(false);
-    setEditingItem(null);
+  };
+
+  const handleDelete = async (projectId) => {
+    try {
+      await axiosPrivate.delete(`/project?projectId=${projectId}`);
+      setProjects(
+        projects.filter((project) => project.projectId !== projectId)
+      );
+      toast.success("Project deleted successfully");
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to delete project. Please try again later.";
+      toast.error(toastMessage);
+    }
+  };
+
+  const handleSave = async (data) => {
+    try {
+      const projectData = {
+        projectTitle: data.projectTitle,
+        description: data.description,
+        technologiesOrTools: data.technologiesOrTools,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        link: data.link,
+        userId: auth.userId,
+        ongoing: data.current,
+        finished: !data.current,
+      };
+
+      // Remove link field if it's empty
+      if (!projectData.link) {
+        delete projectData.link;
+      }
+
+      if (editingItem) {
+        await axiosPrivate.put("/project/edit", {
+          ...projectData,
+          projectId: editingItem.projectId,
+        });
+        toast.success("Project updated successfully");
+      } else {
+        await axiosPrivate.post("/project/create", projectData);
+        toast.success("Project created successfully");
+      }
+
+      fetchProjects();
+      setIsModalOpen(false);
+      setEditingItem(null);
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast.error(
+        editingItem ? "Failed to update project" : "Failed to create project"
+      );
+    }
   };
 
   return (
@@ -70,52 +132,12 @@ const ProjectsSection = () => {
         ) : (
           <div className="space-y-4">
             {projects.map((project) => (
-              <div key={project.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold">{project.title}</h3>
-                    <p className="mt-2 text-gray-700">{project.description}</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {project.technologies.split(",").map((tech, index) => (
-                        <span
-                          key={index}
-                          className="border border-blue-300 text-blue-700 bg-blue-50 px-2 py-1 rounded-full text-xs"
-                        >
-                          {tech.trim()}
-                        </span>
-                      ))}
-                    </div>
-                    {project.url && (
-                      <a
-                        href={project.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm mt-2 block"
-                      >
-                        View Project
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      className="p-2 rounded hover:bg-gray-100 transition-colors"
-                      aria-label="Edit Project"
-                      onClick={() => handleEdit(project)}
-                    >
-                      <FaEdit className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="p-2 rounded hover:bg-red-100 text-red-600 transition-colors"
-                      aria-label="Delete Project"
-                      onClick={() => handleDelete(project.id)}
-                    >
-                      <FaTrash className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ProjectCard
+                key={project.projectId}
+                project={project}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}

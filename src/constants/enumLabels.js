@@ -33,3 +33,9 @@ export const EducationLevelLabels = {
 };
 
 
+export const JobApplicationStatusLabels = {
+    PENDING: "Pending",
+    REJECTED: "Rejected",
+    ACCEPTED: "Accepted"
+}
+

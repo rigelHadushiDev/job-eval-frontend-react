@@ -1,218 +1,118 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import EducationModal from "../userModals/EducationModal";
+import EducationCard from "../EducationCard";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import useAuth from "../../hooks/useAuth";
-import { EducationLevelLabels } from "../../constants/enumLabels";
-import Spinner from "../Spinner";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import ERROR_MESSAGES from "../../constants/ErrorMessages";
-import "react-toastify/dist/ReactToastify.css";
 
-// Custom hook for education operations
-const useEducation = (userId) => {
-  const axiosPrivate = useAxiosPrivate();
+const EducationSection = () => {
   const [educations, setEducations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
 
   const fetchEducations = useCallback(async () => {
-    if (!userId) return;
-    setLoading(true);
     try {
-      const res = await axiosPrivate.get("/education/userEducations", {
-        params: { userId },
-      });
-      setEducations(res.data || []);
-    } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to load education records. Please try again later.";
-      toast.error(toastMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [axiosPrivate, userId]);
-
-  const saveEducation = async (data) => {
-    try {
-      if (data.educationId) {
-        await axiosPrivate.put("/education/edit", {
-          ...data,
-          userId,
-        });
-        toast.success("Education record updated successfully.");
-      } else {
-        await axiosPrivate.post("/education/create", {
-          ...data,
-          userId,
-        });
-        toast.success("Education record added successfully.");
-      }
-      await fetchEducations();
-      return true;
-    } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to save education record. Please try again later.";
-      toast.error(toastMessage);
-      return false;
-    }
-  };
-
-  const deleteEducation = async (educationId) => {
-    try {
-      await axiosPrivate.delete(`/education?educationId=${educationId}`);
-      toast.success("Education record deleted successfully.");
-      await fetchEducations();
-      return true;
-    } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to delete education record. Please try again later.";
-      toast.error(toastMessage);
-      return false;
-    }
-  };
-
-  const getEducationDetails = async (educationId) => {
-    try {
-      const res = await axiosPrivate.get("/education/getEducation", {
-        params: { educationId },
-      });
-      return res.data;
+      const response = await axiosPrivate.get(
+        `/education/userEducations?userId=${auth.userId}`
+      );
+      setEducations(response.data);
     } catch (err) {
       const messageKey = err?.response?.data?.message;
       const toastMessage =
         ERROR_MESSAGES[messageKey] ||
         "Failed to load education details. Please try again later.";
       toast.error(toastMessage);
-      return null;
     }
-  };
+  }, [axiosPrivate, auth.userId]);
 
   useEffect(() => {
     fetchEducations();
   }, [fetchEducations]);
-
-  return {
-    educations,
-    loading,
-    saveEducation,
-    deleteEducation,
-    getEducationDetails,
-    refreshEducations: fetchEducations,
-  };
-};
-
-// Education Card Component
-const EducationCard = React.memo(({ education, onEdit, onDelete }) => {
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-    });
-  };
-
-  return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold">
-            {EducationLevelLabels[education.educationLevel] ||
-              education.educationLevel}
-          </h3>
-          <p className="text-gray-600">{education.institution}</p>
-          <p className="text-sm text-gray-500">
-            {formatDate(education.startedDate)} -{" "}
-            {education.finished
-              ? formatDate(education.graduationDate)
-              : "Present"}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">{education.fieldOfStudy}</p>
-          {education.achievementsDescription && (
-            <p className="mt-2 text-gray-700 line-clamp-3">
-              {education.achievementsDescription}
-            </p>
-          )}
-        </div>
-        <div className="flex space-x-2">
-          <button
-            type="button"
-            className="p-2 rounded hover:bg-gray-100 transition-colors"
-            aria-label="Edit Education"
-            onClick={() => onEdit(education)}
-          >
-            <FaEdit className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded hover:bg-red-100 text-red-600 transition-colors"
-            aria-label="Delete Education"
-            onClick={() => onDelete(education.educationId)}
-          >
-            <FaTrash className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-EducationCard.displayName = "EducationCard";
-
-const EducationSection = () => {
-  const { auth } = useAuth();
-  const userId = auth?.userId;
-  const {
-    educations,
-    loading,
-    saveEducation,
-    deleteEducation,
-    getEducationDetails,
-  } = useEducation(userId);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [modalLoading, setModalLoading] = useState(false);
 
   const handleAdd = () => {
     setEditingItem(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = async (item) => {
+  const handleEdit = async (education) => {
     try {
-      setModalLoading(true);
-      const details = await getEducationDetails(item.educationId);
-      if (details) {
-        setEditingItem(details);
-        setIsModalOpen(true);
-      }
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  const handleSave = async (data) => {
-    setModalLoading(true);
-    try {
-      const success = await saveEducation(data);
-      if (success) {
-        setIsModalOpen(false);
-        setEditingItem(null);
-      }
-    } finally {
-      setModalLoading(false);
+      const response = await axiosPrivate.get(
+        `/education/getEducation?educationId=${education.educationId}`
+      );
+      setEditingItem(response.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to load education details. Please try again later.";
+      toast.error(toastMessage);
     }
   };
 
   const handleDelete = async (educationId) => {
-    await deleteEducation(educationId);
+    try {
+      await axiosPrivate.delete(`/education?educationId=${educationId}`);
+      setEducations(
+        educations.filter((education) => education.educationId !== educationId)
+      );
+      toast.success("Education deleted successfully");
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to delete education. Please try again later.";
+      toast.error(toastMessage);
+    }
+  };
+
+  const handleSave = async (data) => {
+    try {
+      const educationData = {
+        educationLevel: data.educationLevel,
+        fieldOfStudy: data.fieldOfStudy,
+        institution: data.institution,
+        achievementsDescription: data.achievementsDescription,
+        startedDate: data.startDate,
+        graduationDate: data.graduationDate,
+        userId: auth.userId,
+        finished: data.finished,
+      };
+
+      // Remove empty fields
+      Object.keys(educationData).forEach((key) => {
+        if (!educationData[key]) {
+          delete educationData[key];
+        }
+      });
+
+      if (editingItem) {
+        await axiosPrivate.put("/education/edit", {
+          ...educationData,
+          educationId: editingItem.educationId,
+        });
+        toast.success("Education updated successfully");
+      } else {
+        await axiosPrivate.post("/education/create", educationData);
+        toast.success("Education created successfully");
+      }
+
+      fetchEducations();
+      setIsModalOpen(false);
+      setEditingItem(null);
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        (editingItem
+          ? "Failed to update education"
+          : "Failed to create education");
+      toast.error(toastMessage);
+    }
   };
 
   return (
@@ -229,18 +129,16 @@ const EducationSection = () => {
             <span>Add Education</span>
           </button>
         </div>
-        {loading ? (
-          <Spinner loading={loading} />
-        ) : educations.length === 0 ? (
+        {educations.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             No education added yet
           </p>
         ) : (
           <div className="space-y-4">
-            {educations.map((edu) => (
+            {educations.map((education) => (
               <EducationCard
-                key={edu.educationId}
-                education={edu}
+                key={education.educationId}
+                education={education}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
@@ -250,16 +148,11 @@ const EducationSection = () => {
       </div>
       {isModalOpen && (
         <EducationModal
-          onClose={() => {
-            setIsModalOpen(false);
-            setEditingItem(null);
-          }}
+          onClose={() => setIsModalOpen(false)}
           onSave={handleSave}
           editingItem={editingItem}
-          loading={modalLoading}
         />
       )}
-      <ToastContainer />
     </>
   );
 };

@@ -10,6 +10,7 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
+import { FaFileAlt } from "react-icons/fa";
 
 const UserNavBar = () => {
   const { auth, setAuth } = useAuth();
@@ -110,6 +111,14 @@ const UserNavBar = () => {
                         >
                           <FaUsers className="mr-2" />
                           User Data
+                        </NavLink>
+                        <NavLink
+                          to="/my-applications"
+                          className="flex items-center px-4 py-2 hover:bg-gray-100"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          <FaFileAlt className="mr-2" />
+                          My Applications
                         </NavLink>
                       </div>
                     )}

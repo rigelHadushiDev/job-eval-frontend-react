@@ -72,7 +72,6 @@ const SkillsSection = () => {
   const handleSave = async (skillData) => {
     try {
       if (selectedSkill) {
-        // Edit existing skill
         await axiosPrivate.put("/skill/edit", {
           ...skillData,
           userId: auth.userId,

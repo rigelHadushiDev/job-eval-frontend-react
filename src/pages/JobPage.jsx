@@ -56,6 +56,10 @@ const JobPage = () => {
               </h3>
               <div className="text-sm text-white/90 space-y-2">
                 <div>
+                  <span className="font-semibold">Job Title:</span>{" "}
+                  {job.jobTitle || "-"}
+                </div>
+                <div>
                   <span className="font-semibold">Employment Type:</span>{" "}
                   {EmploymentTypeLabels[job.employmentType] ||
                     job.employmentType ||
