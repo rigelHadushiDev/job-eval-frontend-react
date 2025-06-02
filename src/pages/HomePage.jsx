@@ -1,7 +1,5 @@
 import React, { useRef } from "react";
 import Hero from "../components/Hero";
-import JobListings from "../components/JobListings";
-import ViewAllJobs from "../components/ViewAllJobs";
 import Services from "../components/Services";
 import Culture from "../components/Culture";
 import Jobs from "../components/Jobs";

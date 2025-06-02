@@ -13,3 +13,29 @@ export const WorkingTypeLabels = {
     REMOTE: "Remote",
     HYBRID: "Hybrid",
 };
+
+export const GenderLabels = {
+    MALE: "Male",
+    FEMALE: "Female",
+    RATHERNOTSAY: "Rather Not Say",
+};
+
+export const UserTypeLabels = {
+    USER: "User",
+    ADMIN: "Admin",
+    RECRUITER: "Recruiter",
+};
+
+export const EducationLevelLabels = {
+    BACHELOR: "Bachelor's Degree",
+    MASTER: "Master's Degree",
+    DOCTORATE: "Doctorate / PhD",
+};
+
+
+export const JobApplicationStatusLabels = {
+    PENDING: "Pending",
+    REJECTED: "Rejected",
+    ACCEPTED: "Accepted"
+}
+

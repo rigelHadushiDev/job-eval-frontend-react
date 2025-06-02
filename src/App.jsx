@@ -8,17 +8,18 @@ import {
 import UserLayout from "./layouts/UserLayout";
 import HomePage from "./pages/HomePage";
 import JobsPage from "./pages/JobsPage";
-import NotFoundPage from "./pages/NotFoundPage";
 import JobPage, { jobLoader } from "./pages/JobPage";
-import AddJobPage from "./pages/AddJobPage";
-import EditJobPage from "./pages/EditJobPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import Unauthorized from "./components/Unauthorized";
 import RequiredAuth from "./components/RequireAuth";
-import Users from "./components/Users";
 import ChangePassword from "./components/ChangePassword";
 import ForgetPassword from "./components/ForgotPassword";
+import PersonalDetails from "./pages/PersonalDetailsPage";
+import UserDataPage from "./pages/UserDataPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import MyApplicationsPage from "./pages/MyApplicationsPage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -34,7 +35,19 @@ const App = () => {
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/job/:id" element={<JobPage />} loader={jobLoader} />
           <Route path="/change-password" element={<ChangePassword />} />
-
+          <Route
+            element={
+              <RequiredAuth allowedRoles={["USER", "RECRUITER", "ADMIN"]} />
+            }
+          >
+            <Route path="/personal-details" element={<PersonalDetails />} />
+          </Route>
+          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
+            <Route path="/user-data" element={<UserDataPage />} />
+          </Route>
+          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
+            <Route path="/my-applications" element={<MyApplicationsPage />} />
+          </Route>
           {/* <Route
             element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}
           >
@@ -65,7 +78,16 @@ const App = () => {
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ToastContainer
+        autoClose={3000}
+        pauseOnHover={false}
+        pauseOnFocusLoss={false}
+      />
+      <RouterProvider router={router} />
+    </>
+  );
 };
 
 export default App;

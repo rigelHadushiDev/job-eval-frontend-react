@@ -12,6 +12,31 @@ const ERROR_MESSAGES = {
     emailExists: "Email already taken.",
     alreadyAppliedForThisJob: "You have already applied for this job.",
     applyApiFailed: "This operation failed. Please try again later.",
+    usernameTaken: "This username is already taken. Please choose a different one.",
+    emailTaken: "This email is already used. Please choose a different email.",
+    workExperienceNotFound: "The work experience record you’re looking for doesn’t exist.",
+    unAuthorizedToViewWorkExperiences: "You are not authorized to view these work experiences.",
+    unAuthorizedToViewWorkExperience: "You are not authorized to view this work experience.",
+    saveWorkExperienceFailed: "We couldn’t save your work experience. Please try again later.",
+    editWorkExperienceFailed: "We couldn’t update your work experience. Please try again.",
+    deleteWorkExperienceFailed: "Failed to delete the work experience. Please refresh and try again.",
+    educationNotFound: "The selected education record was not found.",
+    unAuthorizedToViewEducations: "You are not authorized to view this user's education history.",
+    unAuthorizedToViewEducation: "You are not authorized to view this education record.",
+    skillNotFound: "The selected skill was not found.",
+    unAuthorizedToViewSkills: "You are not authorized to view this user's skills.",
+    unAuthorizedToViewSkill: "You are not authorized to view this skill.",
+    unAuthorizedToViewApplicantEnglishLevel: "You are not authorized to view this English level entry.",
+    applicantEnglishLevelNotFound: "The requested English level entry was not found.",
+    notAuthorizedToViewTheseProjects: "You are not authorized to view these projects.",
+    projectNotFound: "The requested project was not found.",
+    notAuthorizedToViewThisProject: "You are not authorized to view this project.",
+    startDateCannotBeInFuture: "Start date cannot be in the future.",
+    endDateRequiredWhenExperienceIsFinished: "End date is required when experience is marked as finished.",
+    endDateRequiredWhenProjectIsFinished: "End date is required when project is marked as finished.",
+    endDateMustBeAfterStartDate: "End date must be after start date."
+
+
 };
 
 export default ERROR_MESSAGES;
