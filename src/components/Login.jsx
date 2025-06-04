@@ -39,9 +39,6 @@ function Login() {
       JSON.stringify(response?.data);
       const { userId, accessToken, refreshToken, role, passwordChanged } =
         response?.data ?? {};
-
-      console.log(userId);
-
       setAuth({ userId, user, pwd, accessToken, refreshToken, role });
       setUser("");
       setPwd("");
@@ -50,8 +47,12 @@ function Login() {
         navigate("/change-password");
         return;
       }
-
-      navigate(from, { replace: true });
+      console.log(role);
+      if (role === "ADMIN" || role === "RECRUITER") {
+        navigate("/crm", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       const messageKey = err?.response?.data?.message;
       const toastMessage =

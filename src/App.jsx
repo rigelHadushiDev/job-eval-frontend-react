@@ -20,7 +20,10 @@ import UserDataPage from "./pages/UserDataPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import MyApplicationsPage from "./pages/MyApplicationsPage";
-
+import CRMLayout from "./layouts/CRMLayout";
+import AddJobPostingPage from "./pages/AddJobPostingPage";
+import Dashboard from "./pages/Dashboard";
+import AddEmployees from "./components/AddEmployee";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -40,7 +43,10 @@ const App = () => {
               <RequiredAuth allowedRoles={["USER", "RECRUITER", "ADMIN"]} />
             }
           >
-            <Route path="/personal-details" element={<PersonalDetails />} />
+            <Route
+              path="/personal-details"
+              element={<PersonalDetails isUser={true} />}
+            />
           </Route>
           <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
             <Route path="/user-data" element={<UserDataPage />} />
@@ -48,31 +54,18 @@ const App = () => {
           <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
             <Route path="/my-applications" element={<MyApplicationsPage />} />
           </Route>
-          {/* <Route
-            element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}
-          >
-            <Route path="/users" element={<Users />} />
-          </Route>
-          <Route
-            path="/jobs/:id"
-            element={<JobPage deleteJob={deleteJob} />}
-            loader={jobLoader}
-          />
-          <Route
-            path="/edit-job/:id"
-            element={<EditJobPage updateJobSubmit={editJob} />}
-            loader={jobLoader}
-          />
-          <Route path="*" element={<NotFoundPage />} />
+        </Route>
 
-          <Route
-            path="/add-job"
-            element={
-              <RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]}>
-                <AddJobPage addJobSubmit={addJob} />
-              </RequiredAuth>
-            }
-          /> */}
+        <Route element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}>
+          <Route path="/crm" element={<CRMLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="jobposting" element={<AddJobPostingPage />} />
+            <Route
+              path="personal-details"
+              element={<PersonalDetails isUser={false} />}
+            />
+            <Route path="add-employee" element={<AddEmployees />} />
+          </Route>
         </Route>
       </>
     )

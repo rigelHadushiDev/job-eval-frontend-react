@@ -9,11 +9,14 @@ import {
   faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import ERROR_MESSAGES from "../constants/ErrorMessages";
+import useAuth from "../hooks/useAuth";
 
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const CHANGE_PASSWORD_URL = "/user/changePassw";
 
 const ChangePassword = () => {
+  const { auth } = useAuth();
+
   const [newPassword, setNewPassword] = useState("");
   const [validPwd, setValidPwd] = useState(false);
   const [pwdFocus, setPwdFocus] = useState(false);
@@ -48,7 +51,13 @@ const ChangePassword = () => {
         }
       );
       toast.success("Password changed successfully!");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => {
+        if (auth.role === "ADMIN" || auth.role === "RECRUITER") {
+          navigate("/crm");
+        } else {
+          navigate("/");
+        }
+      }, 2000);
     } catch (err) {
       const messageKey = err?.response?.data?.message;
       const toastMessage =

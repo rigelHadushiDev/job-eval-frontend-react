@@ -34,7 +34,13 @@ const ERROR_MESSAGES = {
     startDateCannotBeInFuture: "Start date cannot be in the future.",
     endDateRequiredWhenExperienceIsFinished: "End date is required when experience is marked as finished.",
     endDateRequiredWhenProjectIsFinished: "End date is required when project is marked as finished.",
-    endDateMustBeAfterStartDate: "End date must be after start date."
+    endDateMustBeAfterStartDate: "End date must be after start date.",
+    jobPostingNotFound: "The requested job posting does not exist.",
+    officesShouldHaveALocation: "For hybrid or on-site positions, both city and country must be provided.",
+    saveJobPostingFailed: "Unable to save the job posting right now. Please try again later.",
+    editJobPostingFailed: "Unable to update the job posting right now. Please try again later.",
+    deleteJobPostingFailed: "Unable to delete the job posting right now. Please try again later.",
+    jobPostingClosed: "This job posting is closed. Please try again later."
 
 
 };
