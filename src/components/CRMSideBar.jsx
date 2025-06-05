@@ -1,6 +1,11 @@
-// src/components/CRMSideBar.jsx
 import React, { useEffect } from "react";
-import { FaBriefcase, FaUser, FaUserPlus, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaBriefcase,
+  FaUser,
+  FaUserPlus,
+  FaSignOutAlt,
+  FaUsers,
+} from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
@@ -15,6 +20,7 @@ const CRMSidebar = () => {
   }, [auth, navigate]);
 
   const isLoggedIn = !!auth?.accessToken;
+  const isAdmin = auth?.role === "ADMIN";
 
   const handleAuthClick = () => {
     if (isLoggedIn) {
@@ -43,6 +49,34 @@ const CRMSidebar = () => {
             <span>Managing Job Posting</span>
           </NavLink>
           <NavLink
+            to="/crm/applicants"
+            className={({ isActive }) =>
+              `w-full flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActive
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`
+            }
+          >
+            <FaUsers className="mr-2 h-4 w-4" />
+            <span>Applicants</span>
+          </NavLink>
+          {isAdmin && (
+            <NavLink
+              to="/crm/add-employee"
+              className={({ isActive }) =>
+                `w-full flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isActive
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`
+              }
+            >
+              <FaUserPlus className="mr-2 h-4 w-4" />
+              <span>Add Employee</span>
+            </NavLink>
+          )}
+          <NavLink
             to="/crm/personal-details"
             className={({ isActive }) =>
               `w-full flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -54,19 +88,6 @@ const CRMSidebar = () => {
           >
             <FaUser className="mr-2 h-4 w-4" />
             <span>Personal Details</span>
-          </NavLink>
-          <NavLink
-            to="/crm/add-employee"
-            className={({ isActive }) =>
-              `w-full flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`
-            }
-          >
-            <FaUserPlus className="mr-2 h-4 w-4" />
-            <span>Add Employee</span>
           </NavLink>
           {isLoggedIn && (
             <button

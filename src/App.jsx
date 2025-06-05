@@ -23,7 +23,9 @@ import MyApplicationsPage from "./pages/MyApplicationsPage";
 import CRMLayout from "./layouts/CRMLayout";
 import AddJobPostingPage from "./pages/AddJobPostingPage";
 import Dashboard from "./pages/Dashboard";
-import AddEmployees from "./components/AddEmployee";
+import AddEmployeePage from "./pages/AddEmployeePage";
+import ApplicantsPage from "./pages/ApplicantsPage";
+
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -64,7 +66,10 @@ const App = () => {
               path="personal-details"
               element={<PersonalDetails isUser={false} />}
             />
-            <Route path="add-employee" element={<AddEmployees />} />
+            <Route element={<RequiredAuth allowedRoles={["ADMIN"]} />}>
+              <Route path="add-employee" element={<AddEmployeePage />} />
+            </Route>
+            <Route path="applicants" element={<ApplicantsPage />} />
           </Route>
         </Route>
       </>

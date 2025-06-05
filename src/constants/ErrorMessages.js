@@ -40,7 +40,14 @@ const ERROR_MESSAGES = {
     saveJobPostingFailed: "Unable to save the job posting right now. Please try again later.",
     editJobPostingFailed: "Unable to update the job posting right now. Please try again later.",
     deleteJobPostingFailed: "Unable to delete the job posting right now. Please try again later.",
-    jobPostingClosed: "This job posting is closed. Please try again later."
+    jobPostingClosed: "This job posting is closed. Please try again later.",
+    invalidPassword: "The password provided is invalid. Please try again.",
+    passwordMismatch: "Passwords do not match. Please re-enter them.",
+    unauthorized: "You do not have permission to perform this action.",
+    accessDenied: "Access denied. Please log in with the appropriate credentials.",
+    validationError: "One or more fields are invalid. Please check your input.",
+    resourceNotFound: "Requested resource could not be found.",
+    operationFailed: "Operation failed. Please try again later."
 
 
 };
