@@ -22,7 +22,7 @@ function ddmmyyyyToInput(dateStr) {
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
-const PersonalDetailsPage = () => {
+const PersonalDetailsPage = ({ isUser }) => {
   const axiosPrivate = useAxiosPrivate();
   const [formData, setFormData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -97,6 +97,7 @@ const PersonalDetailsPage = () => {
               onCancel={handleCancel}
               onSave={handleSave}
               onChange={handleChange}
+              isUser={isUser}
             />
           ) : null}
         </div>

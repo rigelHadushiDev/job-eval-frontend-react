@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLoaderData, useNavigate, useLocation } from "react-router-dom";
 import axios from "../api/axios";
 import {
@@ -31,6 +31,7 @@ const JobPage = () => {
   const location = useLocation();
   const { auth } = useAuth();
   const axiosPrivate = useAxiosPrivate();
+  const [showModal, setShowModal] = useState(false);
 
   if (!job)
     return <div className="text-center py-20 text-red-400">Job not found</div>;
@@ -43,6 +44,35 @@ const JobPage = () => {
       .filter(Boolean);
   }
   if (!Array.isArray(skills)) skills = [];
+
+  const handleApply = async () => {
+    if (!auth?.accessToken) {
+      navigate("/sign-in", {
+        state: { from: location },
+        replace: true,
+      });
+    } else if (auth?.role !== "USER") {
+      toast.error("Unauthorized to apply");
+    } else {
+      setShowModal(true);
+    }
+  };
+
+  const handleConfirmApply = async () => {
+    try {
+      await axiosPrivate.post(`/jobApplication/apply`, null, {
+        params: { jobPostingId: job.jobPostingId },
+      });
+      toast.success("Applied successfully");
+      setShowModal(false);
+    } catch (err) {
+      const messageKey = err?.response?.data?.message;
+      const toastMessage =
+        ERROR_MESSAGES[messageKey] ||
+        "Failed to apply for this job position. Please try again later.";
+      toast.error(toastMessage);
+    }
+  };
 
   return (
     <>
@@ -159,36 +189,50 @@ const JobPage = () => {
           <div className="mt-10">
             <button
               className="w-full py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold text-lg shadow-xl hover:from-blue-600 hover:to-purple-600 transition-all"
-              onClick={async () => {
-                if (!auth?.accessToken) {
-                  navigate("/sign-in", {
-                    state: { from: location },
-                    replace: true,
-                  });
-                } else if (auth?.role !== "USER") {
-                  toast.error("Unauthorized to apply");
-                } else {
-                  try {
-                    await axiosPrivate.post(`/jobApplication/apply`, null, {
-                      params: { jobPostingId: job.jobPostingId },
-                    });
-                    toast.success("Applied successfully");
-                  } catch (err) {
-                    const messageKey = err?.response?.data?.message;
-                    const toastMessage =
-                      ERROR_MESSAGES[messageKey] ||
-                      "Failed to apply for this job position. Please try again later.";
-                    toast.error(toastMessage);
-                  }
-                }
-              }}
+              onClick={handleApply}
             >
               Apply Now
             </button>
-            <ToastContainer />
           </div>
         </div>
       </section>
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#181c2f] rounded-2xl p-8 max-w-md w-full mx-4 border border-white/10">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Confirm Application
+            </h3>
+            <p className="text-white/90 mb-6">
+              Please make sure your user data is up to date before applying.
+              Would you like to:
+            </p>
+            <div className="space-y-4">
+              <button
+                onClick={() => navigate("/user-data")}
+                className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Update My Data
+              </button>
+              <button
+                onClick={handleConfirmApply}
+                className="w-full py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors"
+              >
+                Apply Now
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full py-3 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer />
       <Footer />
     </>
   );

@@ -16,14 +16,17 @@ const PersonalDetailsForm = ({
   onCancel,
   onSave,
   onChange,
+  isUser = true,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow p-9 mt-32">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <Link to="/" className="text-blue-600 hover:text-blue-800">
-            <FaArrowLeft className="h-6 w-6" />
-          </Link>
+          {isUser && (
+            <Link to="/" className="text-blue-600 hover:text-blue-800">
+              <FaArrowLeft className="h-6 w-6" />
+            </Link>
+          )}
           <h1 className="text-2xl font-bold text-gray-900">Personal Details</h1>
         </div>
         {!isEditing ? (

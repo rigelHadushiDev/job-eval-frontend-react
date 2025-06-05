@@ -9,7 +9,7 @@ export const EmploymentTypeLabels = {
 };
 
 export const WorkingTypeLabels = {
-    ONSITE: "On-Site",
+    ON_SITE: "On-Site",
     REMOTE: "Remote",
     HYBRID: "Hybrid",
 };
