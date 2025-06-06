@@ -32,7 +32,7 @@ const CRMSidebar = () => {
   };
 
   return (
-    <aside className="w-64 h-screen border-r border-gray-200 bg-white">
+    <aside className="w-64 h-screen sticky top-0 border-r border-gray-200 bg-white">
       <div className="p-4">
         <nav className="space-y-1">
           <NavLink

@@ -13,7 +13,7 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
     jobTitle: "",
     city: "",
     country: "",
-    workingType: "ONSITE",
+    workingType: "ON_SITE",
     employmentType: "FULL_TIME",
     maxSalary: "",
     minSalary: "",
@@ -31,7 +31,7 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
         jobTitle: editingJob.jobTitle || "",
         city: editingJob.city || "",
         country: editingJob.country || "",
-        workingType: editingJob.workingType || "ONSITE",
+        workingType: editingJob.workingType || "ON_SITE",
         employmentType: editingJob.employmentType || "FULL_TIME",
         maxSalary: editingJob.maxSalary || "",
         minSalary: editingJob.minSalary || "",
@@ -56,7 +56,7 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
         jobTitle: "",
         city: "",
         country: "",
-        workingType: "ONSITE",
+        workingType: "ON_SITE",
         employmentType: "FULL_TIME",
         maxSalary: "",
         minSalary: "",
@@ -229,11 +229,9 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {Object.entries(WorkingTypeLabels).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
+                <option value="ON_SITE">On-site</option>
+                <option value="HYBRID">Hybrid</option>
+                <option value="REMOTE">Remote</option>
               </select>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AddJobPage({ addJobSubmit }) {
   const [title, setTitle] = useState("");
@@ -231,6 +232,7 @@ function AddJobPage({ addJobSubmit }) {
           </div>
         </div>
       </section>
+      <ToastContainer />
     </>
   );
 }

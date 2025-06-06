@@ -25,6 +25,7 @@ import AddJobPostingPage from "./pages/AddJobPostingPage";
 import Dashboard from "./pages/Dashboard";
 import AddEmployeePage from "./pages/AddEmployeePage";
 import ApplicantsPage from "./pages/ApplicantsPage";
+import ApplicantProfilePage from "./pages/ApplicantsProfilePage";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -70,6 +71,10 @@ const App = () => {
               <Route path="add-employee" element={<AddEmployeePage />} />
             </Route>
             <Route path="applicants" element={<ApplicantsPage />} />
+            <Route
+              path="applicants/:userId/:jobApplicationId"
+              element={<ApplicantProfilePage />}
+            />
           </Route>
         </Route>
       </>

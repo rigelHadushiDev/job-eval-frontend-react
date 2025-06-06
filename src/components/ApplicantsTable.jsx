@@ -1,5 +1,6 @@
 import React from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { JobApplicationStatusLabels } from "../constants/enumLabels";
 
 const ApplicantsTable = ({
@@ -10,6 +11,12 @@ const ApplicantsTable = ({
   getScoreColor,
   loading,
 }) => {
+  const navigate = useNavigate();
+
+  const handleRowClick = (userId, jobApplicationId) => {
+    navigate(`/crm/applicants/${userId}/${jobApplicationId}`);
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -94,6 +101,9 @@ const ApplicantsTable = ({
             <tr
               key={applicant.jobApplicationId}
               className="cursor-pointer hover:bg-gray-50"
+              onClick={() =>
+                handleRowClick(applicant.userId, applicant.jobApplicationId)
+              }
             >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div>
