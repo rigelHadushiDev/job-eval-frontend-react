@@ -33,6 +33,7 @@ const PersonalDetailsPage = ({ isUser }) => {
       setLoading(true);
       try {
         const response = await axiosPrivate.get("/user/currentUser");
+        console.log(response.data, "in perosnal data");
         setFormData({
           ...response.data,
           birthdate: ddmmyyyyToInput(response.data.birthdate),

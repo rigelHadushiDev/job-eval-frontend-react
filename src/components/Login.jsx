@@ -37,9 +37,9 @@ function Login() {
         }
       );
       JSON.stringify(response?.data);
-      const { userId, accessToken, refreshToken, role, passwordChanged } =
+      const { userId, accessToken, role, passwordChanged } =
         response?.data ?? {};
-      setAuth({ userId, user, pwd, accessToken, refreshToken, role });
+      setAuth({ userId, username: user, role, accessToken });
       setUser("");
       setPwd("");
 
@@ -47,7 +47,6 @@ function Login() {
         navigate("/change-password");
         return;
       }
-      console.log(role);
       if (role === "ADMIN" || role === "RECRUITER") {
         navigate("/crm", { replace: true });
       } else {

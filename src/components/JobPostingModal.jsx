@@ -97,7 +97,6 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
     for (const field of requiredFields) {
       if (field === "requiredSkills") {
         if (skills.length === 0) {
-          console.log(`Missing or empty field: ${field}`);
           toast.error("Please add at least one required skill.");
           return;
         }
@@ -105,7 +104,6 @@ const JobPostingModal = ({ isOpen, onClose, onSave, editingJob }) => {
         !formData[field] ||
         (Array.isArray(formData[field]) && formData[field].length === 0)
       ) {
-        console.log(`Missing or empty field: ${field}`);
         toast.error("Please fill in all required fields.");
         return;
       }

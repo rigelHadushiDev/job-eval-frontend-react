@@ -11,23 +11,46 @@ const ProjectsSection = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
 
+  const notifyError = (err, fallback) => {
+    const messageKey = err?.response?.data?.message;
+    const toastMessage = ERROR_MESSAGES[messageKey] || fallback;
+    toast.error(toastMessage);
+  };
+
   const fetchProjects = useCallback(async () => {
-    try {
-      const response = await axiosPrivate.get(
-        `/project/userProjects?userId=${auth.userId}`
-      );
-      setProjects(response.data);
-    } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to load work experience details. Please try again later.";
-      toast.error(toastMessage);
+    if (!auth?.userId || !auth?.accessToken) {
+      return;
     }
-  }, [axiosPrivate, auth.userId]);
+
+    const controller = new AbortController();
+
+    try {
+      setLoading(true);
+
+      const response = await axiosPrivate.get("/project/userProjects", {
+        params: { userId: auth.userId },
+        signal: controller.signal,
+      });
+
+      setProjects(response.data || []);
+    } catch (err) {
+      if (err.name !== "CanceledError" && err.name !== "AbortError") {
+        notifyError(
+          err,
+          "Failed to load project details. Please try again later."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+
+    return () => controller.abort();
+  }, [axiosPrivate, auth?.userId, auth?.accessToken]);
 
   useEffect(() => {
     fetchProjects();
@@ -40,33 +63,33 @@ const ProjectsSection = () => {
 
   const handleEdit = async (project) => {
     try {
-      const response = await axiosPrivate.get(
-        `/project/getProject?projectId=${project.projectId}`
-      );
+      const response = await axiosPrivate.get("/project/getProject", {
+        params: { projectId: project.projectId },
+      });
+
       setEditingItem(response.data);
       setIsModalOpen(true);
     } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to load project details. Please try again later.";
-      toast.error(toastMessage);
+      notifyError(
+        err,
+        "Failed to load project details. Please try again later."
+      );
     }
   };
 
   const handleDelete = async (projectId) => {
     try {
-      await axiosPrivate.delete(`/project?projectId=${projectId}`);
-      setProjects(
-        projects.filter((project) => project.projectId !== projectId)
+      await axiosPrivate.delete("/project", {
+        params: { projectId },
+      });
+
+      setProjects((prev) =>
+        prev.filter((project) => project.projectId !== projectId)
       );
+
       toast.success("Project deleted successfully");
     } catch (err) {
-      const messageKey = err?.response?.data?.message;
-      const toastMessage =
-        ERROR_MESSAGES[messageKey] ||
-        "Failed to delete project. Please try again later.";
-      toast.error(toastMessage);
+      notifyError(err, "Failed to delete project. Please try again later.");
     }
   };
 
@@ -84,7 +107,6 @@ const ProjectsSection = () => {
         finished: !data.current,
       };
 
-      // Remove link field if it's empty
       if (!projectData.link) {
         delete projectData.link;
       }
@@ -100,16 +122,48 @@ const ProjectsSection = () => {
         toast.success("Project created successfully");
       }
 
+      setLoading(true);
       fetchProjects();
+
       setIsModalOpen(false);
       setEditingItem(null);
-    } catch (error) {
-      console.error("Error saving project:", error);
-      toast.error(
+    } catch (err) {
+      notifyError(
+        err,
         editingItem ? "Failed to update project" : "Failed to create project"
       );
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between border-b pb-4 mb-4">
+            <h2 className="text-xl font-semibold">Projects</h2>
+            <button
+              type="button"
+              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <FaPlus className="h-4 w-4" />
+              <span>Add Project</span>
+            </button>
+          </div>
+
+          <p className="text-gray-500 text-center py-8">Loading...</p>
+        </div>
+
+        {isModalOpen && (
+          <ProjectsModal
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleSave}
+            editingItem={editingItem}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>
@@ -125,6 +179,7 @@ const ProjectsSection = () => {
             <span>Add Project</span>
           </button>
         </div>
+
         {projects.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             No projects added yet
@@ -142,6 +197,7 @@ const ProjectsSection = () => {
           </div>
         )}
       </div>
+
       {isModalOpen && (
         <ProjectsModal
           onClose={() => setIsModalOpen(false)}

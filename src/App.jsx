@@ -26,55 +26,81 @@ import Dashboard from "./pages/Dashboard";
 import AddEmployeePage from "./pages/AddEmployeePage";
 import ApplicantsPage from "./pages/ApplicantsPage";
 import ApplicantProfilePage from "./pages/ApplicantsProfilePage";
+import PersistLogin from "./components/PersistLogin";
 
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
+        {/* PUBLIC AUTH ROUTES */}
         <Route path="/sign-up" element={<RegisterPage />} />
         <Route path="/sign-in" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        <Route path="/" element={<UserLayout />}>
+        {/* USER-FACING AREA (public pages + protected pages) */}
+        <Route
+          path="/"
+          element={
+            <PersistLogin>
+              <UserLayout />
+            </PersistLogin>
+          }
+        >
+          {/* public pages */}
           <Route index element={<HomePage />} />
-          <Route path="/jobs" element={<JobsPage />} />
-          <Route path="/job/:id" element={<JobPage />} loader={jobLoader} />
-          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="jobs" element={<JobsPage />} />
+          <Route path="job/:id" element={<JobPage />} loader={jobLoader} />
+
+          {/* protected: any logged-in role */}
           <Route
             element={
               <RequiredAuth allowedRoles={["USER", "RECRUITER", "ADMIN"]} />
             }
           >
             <Route
-              path="/personal-details"
+              path="personal-details"
               element={<PersonalDetails isUser={true} />}
             />
+            <Route path="change-password" element={<ChangePassword />} />
           </Route>
+
+          {/* protected: USER only */}
           <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
-            <Route path="/user-data" element={<UserDataPage />} />
-          </Route>
-          <Route element={<RequiredAuth allowedRoles={["USER"]} />}>
-            <Route path="/my-applications" element={<MyApplicationsPage />} />
+            <Route path="user-data" element={<UserDataPage />} />
+            <Route path="my-applications" element={<MyApplicationsPage />} />
           </Route>
         </Route>
 
-        <Route element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}>
-          <Route path="/crm" element={<CRMLayout />}>
+        {/* CRM AREA (RECRUITER / ADMIN) */}
+        <Route
+          path="/crm"
+          element={
+            <PersistLogin>
+              <CRMLayout />
+            </PersistLogin>
+          }
+        >
+          {/* protected: RECRUITER and ADMIN */}
+          <Route
+            element={<RequiredAuth allowedRoles={["ADMIN", "RECRUITER"]} />}
+          >
             <Route index element={<Dashboard />} />
             <Route path="jobposting" element={<AddJobPostingPage />} />
             <Route
               path="personal-details"
               element={<PersonalDetails isUser={false} />}
             />
-            <Route element={<RequiredAuth allowedRoles={["ADMIN"]} />}>
-              <Route path="add-employee" element={<AddEmployeePage />} />
-            </Route>
             <Route path="applicants" element={<ApplicantsPage />} />
             <Route
               path="applicants/:userId/:jobApplicationId"
               element={<ApplicantProfilePage />}
             />
+          </Route>
+
+          {/* protected: ADMIN only */}
+          <Route element={<RequiredAuth allowedRoles={["ADMIN"]} />}>
+            <Route path="add-employee" element={<AddEmployeePage />} />
           </Route>
         </Route>
       </>

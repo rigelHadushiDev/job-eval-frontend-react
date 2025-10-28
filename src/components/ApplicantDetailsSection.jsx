@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { FaSpinner } from "react-icons/fa";
 import ExpandableText from "./ExpandableText";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { toast } from "react-toastify";
@@ -12,6 +13,7 @@ const ApplicantDetailsSection = ({
   status,
 }) => {
   const axiosPrivate = useAxiosPrivate();
+
   const [workExperiences, setWorkExperiences] = useState([]);
   const [skills, setSkills] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -19,44 +21,70 @@ const ApplicantDetailsSection = ({
   const [englishLevel, setEnglishLevel] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [
-          workExpResponse,
-          skillsResponse,
-          projectsResponse,
-          educationsResponse,
-          englishLevelResponse,
-        ] = await Promise.all([
-          axiosPrivate.get(`/workExp/userWorkExperiences?userId=${userId}`),
-          axiosPrivate.get(`/skill/userSkills?userId=${userId}`),
-          axiosPrivate.get(`/project/userProjects?userId=${userId}`),
-          axiosPrivate.get(`/education/userEducations?userId=${userId}`),
-          axiosPrivate.get(
-            `/applicantEnglishLevel/getApplicantEnglishLevel?userId=${userId}`
-          ),
-        ]);
+  const notifyError = (fallbackMsg, err) => {
+    console.error(err);
+    toast.error(fallbackMsg);
+  };
 
-        console.log("Work Experience Response:", workExpResponse.data);
-        setWorkExperiences(workExpResponse.data);
-        setSkills(skillsResponse.data);
-        setProjects(projectsResponse.data);
-        setEducations(educationsResponse.data);
-        setEnglishLevel(englishLevelResponse.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Failed to fetch applicant details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-      fetchData();
+  const fetchData = useCallback(async () => {
+    if (!userId) {
+      return;
     }
-  }, [userId, axiosPrivate]);
 
+    const controller = new AbortController();
+
+    try {
+      setLoading(true);
+
+      const [
+        workExpResponse,
+        skillsResponse,
+        projectsResponse,
+        educationsResponse,
+        englishLevelResponse,
+      ] = await Promise.all([
+        axiosPrivate.get(`/workExp/userWorkExperiences`, {
+          params: { userId },
+          signal: controller.signal,
+        }),
+        axiosPrivate.get(`/skill/userSkills`, {
+          params: { userId },
+          signal: controller.signal,
+        }),
+        axiosPrivate.get(`/project/userProjects`, {
+          params: { userId },
+          signal: controller.signal,
+        }),
+        axiosPrivate.get(`/education/userEducations`, {
+          params: { userId },
+          signal: controller.signal,
+        }),
+        axiosPrivate.get(`/applicantEnglishLevel/getApplicantEnglishLevel`, {
+          params: { userId },
+          signal: controller.signal,
+        }),
+      ]);
+
+      setWorkExperiences(workExpResponse.data);
+      setSkills(skillsResponse.data);
+      setProjects(projectsResponse.data);
+      setEducations(educationsResponse.data);
+      setEnglishLevel(englishLevelResponse.data);
+    } catch (err) {
+      if (err.name !== "CanceledError" && err.name !== "AbortError") {
+        notifyError("Failed to fetch applicant details", err);
+      }
+    } finally {
+      setLoading(false);
+    }
+    return () => controller.abort();
+  }, [axiosPrivate, userId]);
+
+  useEffect(() => {
+    const cancelFnPromise = fetchData();
+  }, [fetchData]);
+
+  // optional: show pretty dates
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -85,10 +113,20 @@ const ApplicantDetailsSection = ({
     return levels[level] || "Unknown";
   };
 
+  if (!userId) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="text-gray-500 text-sm">
+          Loading applicant information...
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <FaSpinner className="animate-spin h-8 w-8 text-blue-500" />
       </div>
     );
   }
@@ -203,7 +241,7 @@ const ApplicantDetailsSection = ({
             <div className="flex items-center space-x-4">
               <span className="font-medium text-gray-700">Level:</span>
               <span className="border border-gray-300 text-lg px-3 py-1 rounded-md">
-                {englishLevel?.proficiencyLevel}
+                {englishLevel.proficiencyLevel}
               </span>
             </div>
           )}
@@ -230,7 +268,7 @@ const ApplicantDetailsSection = ({
                   <ExpandableText text={project.description} />
                   <div className="flex flex-wrap gap-2 mt-2">
                     {project.technologiesOrTools
-                      .split(",")
+                      ?.split(",")
                       .map((tech, techIndex) => (
                         <span
                           key={techIndex}
@@ -256,7 +294,8 @@ const ApplicantDetailsSection = ({
           </div>
         </div>
       </div>
-      {/* Accept/Reject Buttons if handlers and jobApplicationId are provided */}
+
+      {/* Accept / Reject controls */}
       {jobApplicationId && handleAdmit && handleReject && status && (
         <div className="flex justify-center space-x-4 pt-6">
           {(status === "PENDING" || status === "REJECTED") && (
@@ -267,6 +306,7 @@ const ApplicantDetailsSection = ({
               Accept Applicant
             </button>
           )}
+
           {(status === "PENDING" || status === "ACCEPTED") && (
             <button
               className="px-4 py-2 border border-red-600 text-red-600 rounded-md hover:bg-red-50 transition-colors"
